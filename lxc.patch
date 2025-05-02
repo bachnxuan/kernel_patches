@@ -1,0 +1,239 @@
+From b1671b229623b4afbd582a935b7f535408229512 Mon Sep 17 00:00:00 2001
+From: bachnxuan <bachnxuan@gmail.com>
+Date: Fri, 2 May 2025 18:34:31 +0700
+Subject: [PATCH] LXC Patch * This patch contains necessary commits for lxc
+ (ESK Kernel): - GKI: use Android ABI padding for POSIX_MQUEUE user_struct
+ fields - cgroup: fix cgroup prefix - overlayfs:dont make
+ DCACHE_OP_{HASH,COMPARE} weird - esk_defconfig: Add lxc configs - xaga: Add
+ lxc configs - Patch mali gpu driver for libhybris
+
+Signed-off-by: bachnxuan <bachnxuan@gmail.com>
+---
+ arch/arm64/configs/esk_defconfig              | 14 +++++++--
+ arch/arm64/configs/vendor/xaga.config         | 11 +++++++
+ .../arm/midgard/context/mali_kbase_context.c  | 30 +++++++------------
+ fs/overlayfs/util.c                           |  4 +--
+ include/linux/sched/user.h                    |  8 ++++-
+ kernel/cgroup/cgroup.c                        |  4 +++
+ 6 files changed, 44 insertions(+), 27 deletions(-)
+
+diff --git a/arch/arm64/configs/esk_defconfig b/arch/arm64/configs/esk_defconfig
+index 13b0a33849d9..5ea2b5a8e8e6 100644
+--- a/arch/arm64/configs/esk_defconfig
++++ b/arch/arm64/configs/esk_defconfig
+@@ -1,5 +1,7 @@
+ CONFIG_LOCALVERSION="-ESK-v1.4-LTS"
+ CONFIG_LOCALVERSION_AUTO=y
++CONFIG_SYSVIPC=y
++CONFIG_POSIX_MQUEUE=y
+ CONFIG_IRQ_SBALANCE=y
+ CONFIG_SBALANCE_EXCLUDE_CPUS="3,7"
+ CONFIG_UNAME_OVERRIDE=y
+@@ -31,10 +33,11 @@ CONFIG_CGROUP_SCHED=y
+ CONFIG_UCLAMP_TASK_GROUP=y
+ CONFIG_CGROUP_FREEZER=y
+ CONFIG_CPUSETS=y
++CONFIG_CGROUP_DEVICE=y
+ CONFIG_CGROUP_CPUACCT=y
+ CONFIG_CGROUP_BPF=y
+ CONFIG_NAMESPACES=y
+-# CONFIG_PID_NS is not set
++CONFIG_USER_NS=y
+ CONFIG_SCHED_CASS=y
+ CONFIG_RT_SOFTINT_OPTIMIZATION=y
+ # CONFIG_RD_BZIP2 is not set
+@@ -119,7 +122,6 @@ CONFIG_LLVM_POLLY=y
+ CONFIG_MODULES=y
+ CONFIG_MODULE_UNLOAD=y
+ CONFIG_MODVERSIONS=y
+-CONFIG_MODULE_SCMVERSION=y
+ CONFIG_BLK_CGROUP_IOCOST=y
+ CONFIG_BLK_INLINE_ENCRYPTION=y
+ CONFIG_BLK_INLINE_ENCRYPTION_FALLBACK=y
+@@ -188,6 +190,7 @@ CONFIG_NF_CONNTRACK_PPTP=y
+ CONFIG_NF_CONNTRACK_SANE=y
+ CONFIG_NF_CONNTRACK_TFTP=y
+ CONFIG_NF_CT_NETLINK=y
++CONFIG_NETFILTER_XT_TARGET_CHECKSUM=y
+ CONFIG_NETFILTER_XT_TARGET_CLASSIFY=y
+ CONFIG_NETFILTER_XT_TARGET_CONNMARK=y
+ CONFIG_NETFILTER_XT_TARGET_CONNSECMARK=y
+@@ -202,6 +205,7 @@ CONFIG_NETFILTER_XT_TARGET_TPROXY=y
+ CONFIG_NETFILTER_XT_TARGET_TRACE=y
+ CONFIG_NETFILTER_XT_TARGET_SECMARK=y
+ CONFIG_NETFILTER_XT_TARGET_TCPMSS=y
++CONFIG_NETFILTER_XT_MATCH_ADDRTYPE=y
+ CONFIG_NETFILTER_XT_MATCH_BPF=y
+ CONFIG_NETFILTER_XT_MATCH_COMMENT=y
+ CONFIG_NETFILTER_XT_MATCH_CONNLIMIT=y
+@@ -251,6 +255,8 @@ CONFIG_IP6_NF_FILTER=y
+ CONFIG_IP6_NF_TARGET_REJECT=y
+ CONFIG_IP6_NF_MANGLE=y
+ CONFIG_IP6_NF_RAW=y
++CONFIG_IP6_NF_NAT=y
++CONFIG_IP6_NF_TARGET_MASQUERADE=y
+ CONFIG_IP6_NF_TARGET_HL=y
+ CONFIG_IP6_NF_MATCH_HL=y
+ CONFIG_TIPC=y
+@@ -305,6 +311,7 @@ CONFIG_BT_HCIUART=y
+ CONFIG_BT_HCIUART_LL=y
+ CONFIG_BT_HCIUART_BCM=y
+ CONFIG_BT_HCIUART_QCA=y
++CONFIG_BT_HCIVHCI=y
+ CONFIG_RFKILL=y
+ CONFIG_NFC=y
+ CONFIG_PCI=y
+@@ -316,6 +323,7 @@ CONFIG_PCIE_DW_PLAT_EP=y
+ CONFIG_PCIE_QCOM=y
+ CONFIG_PCIE_KIRIN=y
+ CONFIG_PCI_ENDPOINT=y
++CONFIG_DEVTMPFS=y
+ CONFIG_FW_LOADER_USER_HELPER=y
+ # CONFIG_FW_CACHE is not set
+ # CONFIG_SUN50I_DE2_BUS is not set
+@@ -393,7 +401,6 @@ CONFIG_JOYSTICK_XPAD_LEDS=y
+ CONFIG_INPUT_TOUCHSCREEN=y
+ CONFIG_INPUT_MISC=y
+ CONFIG_INPUT_UINPUT=y
+-# CONFIG_VT is not set
+ # CONFIG_LEGACY_PTYS is not set
+ CONFIG_SERIAL_8250=y
+ # CONFIG_SERIAL_8250_DEPRECATED_OPTIONS is not set
+@@ -409,6 +416,7 @@ CONFIG_SERIAL_SAMSUNG_CONSOLE=y
+ CONFIG_SERIAL_MSM_GENI_EARLY_CONSOLE=y
+ CONFIG_SERIAL_SPRD=y
+ CONFIG_SERIAL_SPRD_CONSOLE=y
++CONFIG_NULL_TTY=y
+ CONFIG_HVC_DCC=y
+ CONFIG_HVC_DCC_SERIALIZE_SMP=y
+ CONFIG_SERIAL_DEV_BUS=y
+diff --git a/arch/arm64/configs/vendor/xaga.config b/arch/arm64/configs/vendor/xaga.config
+index dda9ea281194..efdb2e277d5b 100644
+--- a/arch/arm64/configs/vendor/xaga.config
++++ b/arch/arm64/configs/vendor/xaga.config
+@@ -56,3 +56,14 @@ CONFIG_TOUCHSCREEN_MT6895_ALPHA_SUPPORT=m
+ CONFIG_TOUCHSCREEN_XIAOMI_TOUCHFEATURE=m
+ CONFIG_TOUCHSCREEN_NVT36672C_HOSTDL_SPI=m
+ CONFIG_TOUCHSCREEN_NVT36672C_DOUBLE_CLICK=m
++
++# LXC
++CONFIG_SYSVIPC=y
++CONFIG_UTS_NS=y
++CONFIG_PID_NS=y
++CONFIG_IPC_NS=y
++CONFIG_USER_NS=y
++CONFIG_NET_NS=y
++CONFIG_CGROUP_DEVICE=y
++CONFIG_CGROUP_FREEZER=y
++CONFIG_IP6_NF_NAT=y
+diff --git a/drivers/gpu/mediatek/mali-valhall/gpu/arm/midgard/context/mali_kbase_context.c b/drivers/gpu/mediatek/mali-valhall/gpu/arm/midgard/context/mali_kbase_context.c
+index a71a08872dd8..dcfebb558651 100644
+--- a/drivers/gpu/mediatek/mali-valhall/gpu/arm/midgard/context/mali_kbase_context.c
++++ b/drivers/gpu/mediatek/mali-valhall/gpu/arm/midgard/context/mali_kbase_context.c
+@@ -132,6 +132,7 @@ int kbase_context_common_init(struct kbase_context *kctx)
+ {
+ 	const unsigned long cookies_mask = KBASE_COOKIE_MASK;
+ 	int err = 0;
++	struct task_struct *task;
+ 
+ 	/* creating a context is considered a disjoint event */
+ 	kbase_disjoint_event(kctx->kbdev);
+@@ -149,30 +150,19 @@ int kbase_context_common_init(struct kbase_context *kctx)
+ 
+ 	/* Check if this is a Userspace created context */
+ 	if (likely(kctx->filp)) {
+-		struct pid *pid_struct;
+ 
+ 		rcu_read_lock();
+-		pid_struct = find_get_pid(kctx->tgid);
+-		if (likely(pid_struct)) {
+-			struct task_struct *task = pid_task(pid_struct, PIDTYPE_PID);
+-
+-			if (likely(task)) {
+-				/* Take a reference on the task to avoid slow lookup
+-				 * later on from the page allocation loop.
+-				 */
+-				get_task_struct(task);
+-				kctx->task = task;
+-			} else {
+-				dev_err(kctx->kbdev->dev,
+-					"Failed to get task pointer for %s/%d",
+-					current->comm, current->pid);
+-				err = -ESRCH;
+-			}
+-
+-			put_pid(pid_struct);
++		task = current;
++
++		if (likely(task)) {
++			/* Take a reference on the task to avoid slow lookup
++			 * later on from the page allocation loop.
++			 */
++			get_task_struct(task);
++			kctx->task = task;
+ 		} else {
+ 			dev_err(kctx->kbdev->dev,
+-				"Failed to get pid pointer for %s/%d",
++				"Failed to get task pointer for %s/%d",
+ 				current->comm, current->pid);
+ 			err = -ESRCH;
+ 		}
+diff --git a/fs/overlayfs/util.c b/fs/overlayfs/util.c
+index b103ce250807..58807ec08e94 100644
+--- a/fs/overlayfs/util.c
++++ b/fs/overlayfs/util.c
+@@ -143,9 +143,7 @@ bool ovl_dentry_weird(struct dentry *dentry)
+ 		return true;
+ 
+ 	return dentry->d_flags & (DCACHE_NEED_AUTOMOUNT |
+-				  DCACHE_MANAGE_TRANSIT |
+-				  DCACHE_OP_HASH |
+-				  DCACHE_OP_COMPARE);
++				  DCACHE_MANAGE_TRANSIT);
+ }
+ 
+ enum ovl_path_type ovl_path_type(struct dentry *dentry)
+diff --git a/include/linux/sched/user.h b/include/linux/sched/user.h
+index 6d63a5260130..b96fe706b5ef 100644
+--- a/include/linux/sched/user.h
++++ b/include/linux/sched/user.h
+@@ -23,7 +23,7 @@ struct user_struct {
+ #endif
+ #ifdef CONFIG_POSIX_MQUEUE
+ 	/* protected by mq_lock	*/
+-	unsigned long mq_bytes;	/* How many bytes can be allocated to mqueue? */
++	//unsigned long mq_bytes;	/* How many bytes can be allocated to mqueue? */
+ #endif
+ 	unsigned long locked_shm; /* How many pages of mlocked shm ? */
+ 	unsigned long unix_inflight;	/* How many files in flight in unix sockets */
+@@ -44,9 +44,15 @@ struct user_struct {
+ 	/* Miscellaneous per-user rate limit */
+ 	struct ratelimit_state ratelimit;
+ 
++#if defined(CONFIG_POSIX_MQUEUE)
++	ANDROID_KABI_USE(1, unsigned long mq_bytes);
++	ANDROID_KABI_RESERVE(2);
++	ANDROID_OEM_DATA_ARRAY(1, 2);
++#else
+ 	ANDROID_KABI_RESERVE(1);
+ 	ANDROID_KABI_RESERVE(2);
+ 	ANDROID_OEM_DATA_ARRAY(1, 2);
++#endif
+ };
+ 
+ extern int uids_sysfs_init(void);
+diff --git a/kernel/cgroup/cgroup.c b/kernel/cgroup/cgroup.c
+index 2aeec07739a5..e055eb1ecc3f 100644
+--- a/kernel/cgroup/cgroup.c
++++ b/kernel/cgroup/cgroup.c
+@@ -4012,6 +4012,10 @@ static int cgroup_add_file(struct cgroup_subsys_state *css, struct cgroup *cgrp,
+ 		cfile->kn = kn;
+ 		spin_unlock_irq(&cgroup_file_kn_lock);
+ 	}
++	if (cft->ss && (cgrp->root->flags & CGRP_ROOT_NOPREFIX) && !(cft->flags & CFTYPE_NO_PREFIX)) {
++				snprintf(name, CGROUP_FILE_NAME_MAX, "%s.%s", cft->ss->name, cft->name);
++				kernfs_create_link(cgrp->kn, name, kn);
++	}
+ 
+ 	return 0;
+ }
