@@ -22,7 +22,7 @@ index 13b0a33849d9..5ea2b5a8e8e6 100644
 --- a/arch/arm64/configs/esk_defconfig
 +++ b/arch/arm64/configs/esk_defconfig
 @@ -1,5 +1,7 @@
- CONFIG_LOCALVERSION="-ESK-v1.4-LTS"
+ CONFIG_LOCALVERSION="-ESK-v1.5-LTS"
  CONFIG_LOCALVERSION_AUTO=y
 +CONFIG_SYSVIPC=y
 +CONFIG_POSIX_MQUEUE=y
