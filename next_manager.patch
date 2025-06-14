@@ -7,7 +7,7 @@ index c1e803d7..c677c676 100644
  	}
  
 -	return check_v2_signature(path, EXPECTED_NEXT_SIZE, EXPECTED_NEXT_HASH);
-+  return (check_v2_signature(path, EXPECTED_NEXT_SIZE, EXPECTED_NEXT_HASH)
++  return (check_v2_signature(path, EXPECTED_NEXT_SIZE, EXPECTED_NEXT_HASH);
 +	|| check_v2_signature(path, 0x033b, "c371061b19d8c7d7d6133c6a9bafe198fa944e50c1b31c9d8daa8d7f1fc2d2d6") // tiann/KernelSU
 +	|| check_v2_signature(path, 384, "7e0c6d7278a3bb8e364e0fcba95afaf3666cf5ff3c245a3b63c8833bd0445cc4") // 5ec1cff/KernelSU
 +	|| check_v2_signature(path, 0x3e6, "79e590113c4c4c0c222978e413a5faa801666957b1212a328e46c00c69821bf7") // rifsxd/KernelSU-Next
